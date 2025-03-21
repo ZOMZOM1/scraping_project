@@ -1,65 +1,42 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from bs4 import BeautifulSoup
-import time
-import pandas as pd
+📦 メルカリ商品情報スクレイピング
 
-# ChromeDriverのパスを指定（適宜変更）
-chrome_driver_path = "/path/to/chromedriver"  # 例: "/usr/local/bin/chromedriver"
+📝 概要
+本プロジェクトは、フリマアプリ「メルカリ」上の特定キーワード検索結果から、商品情報を自動取得するスクレイピングツールです。
+Python と BeautifulSoup、Selenium を用いて構築しており、初学者から実務利用まで対応できる汎用的な構成になっています。
 
-# Seleniumの設定
-options = webdriver.ChromeOptions()
-options.add_argument("--headless")  # ヘッドレスモード（ブラウザを開かずに実行）
-service = Service(chrome_driver_path)
-driver = webdriver.Chrome(service=service, options=options)
+🔍 取得対象データ
+項目	内容
+商品名	商品のタイトルテキスト
+価格	表示されている販売価格
+商品詳細URL	商品の個別ページへのリンク
+商品画像URL（任意）	商品画像のURL（※必要に応じて追加可能）
 
-# **スクレイピング対象のURL（メルカリの検索結果ページ）**
-search_url = "https://jp.mercari.com/search?keyword=PS5"  # ここを好きなキーワードに変更
-driver.get(search_url)
+🛠 使用技術・ライブラリ
+Python 3.x
+requests
+BeautifulSoup
+Selenium（動的ページ対応）
+pandas（CSV出力用）
 
-# ページが完全に読み込まれるまで待機
-time.sleep(3)
+🚀 実行方法
+必要なライブラリをインストール
+pip install requests beautifulsoup4 selenium pandas
+ChromeDriver を環境に合わせて設置（※Chromeバージョンに対応するもの）
 
-# **BeautifulSoupでページ解析**
-soup = BeautifulSoup(driver.page_source, "html.parser")
+スクリプトを実行
+python mercari_scraper.py
+💡 応用可能なユースケース
+ECサイト価格モニタリング
+売れ筋商品の傾向分析
+在庫トラッキングシステムの原型
+マーケット調査用のデータ収集
 
-# **取得するデータのリスト**
-products = []
+📁 出力形式
+取得データはCSV形式で保存され、Excelなどで開いてすぐに確認・分析が可能です。
 
-# **商品情報を取得**
-for item in soup.find_all("div", class_="sc-5bb1edfb-9 PSMbT"):  # メルカリの商品枠のクラス名（適宜変更）
-    try:
-        # 商品名
-        title = item.find("p", class_="merText caption__5616e150 primary__5616e150").text.strip()
-
-        # 価格
-        price = item.find("div", {"data-testid": "price"}).text.strip()
-
-        # 商品URL
-        link_tag = item.find("a", href=True)
-        if link_tag:
-            product_url = "https://jp.mercari.com" + link_tag["href"]
-        else:
-            product_url = "なし"
-
-        # 取得したデータをリストに追加
-        products.append({"商品名": title, "価格": price, "商品URL": product_url})
-
-    except AttributeError:
-        continue
-
-# **取得結果をデータフレーム化**
-df = pd.DataFrame(products)
-
-# **CSVファイルに保存**
-df.to_csv("mercari_products.csv", index=False, encoding="utf-8-sig")
-
-# **完了メッセージ**
-print("✅ スクレイピング完了！データは 'mercari_products.csv' に保存しました。")
-
-# **ブラウザを閉じる**
-driver.quit()
-# scraping_project
-スクレイピングとデータ分析のポートフォリオ
+✨ 今後の拡張予定（オプション）
+商品説明やカテゴリ、在庫状況の取得
+データの定期自動取得（cron連携）
+GUI対応やWebアプリ化（Streamlitなど）
+必要に応じて「mercari_scraper.py」や「sample_output.csv」も含めてGitHubにアップしておくと、より魅力的なポートフォリオになりますよ！
+必要であれば mercari_scraper.py のサンプルコードもお渡しできますので、お声がけください 😊
